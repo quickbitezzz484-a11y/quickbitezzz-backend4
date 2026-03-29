@@ -15,7 +15,7 @@ valid_students = [
 ]
 
 orders = []
-TOTAL_SEATS = 50
+TOTAL_SEATS = 150
 available_seats = TOTAL_SEATS
 
 @app.route('/')
@@ -29,7 +29,8 @@ def menu():
         {"id": 1, "name": "Burger", "price": 100},
         {"id": 2, "name": "Pizza", "price": 150},
         {"id": 3, "name": "Fries", "price": 70},
-        {"id": 4, "name": "egg noodles", "price": 100}
+        {"id": 4, "name": "egg noodles", "price": 100},
+        {"id": 5, "name": "Water Bottle", "price": 20}
     ]
     return jsonify(food_menu)
 
@@ -37,11 +38,11 @@ def update_status(order):
     print("Started status thread for order", order["order_id"])
 
     time.sleep(5)
-    order["status"] = "Ready Avuthundhi Chill macha"
+    order["status"] = "Almost Ready!!!"
     print("Order", order["order_id"], "-> Ready")
 
     time.sleep(5)
-    order["status"] = "Ochi Tini Poo"
+    order["status"] = "Your Order is Ready"
     print("Order", order["order_id"], "-> Delivered")
 
 @app.route('/order', methods=['POST'])
