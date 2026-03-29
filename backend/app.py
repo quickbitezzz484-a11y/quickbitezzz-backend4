@@ -26,22 +26,27 @@ def home():
 @app.route('/menu', methods=['GET'])
 def menu():
     food_menu = [
-        {"id": 1, "name": "Burger", "price": 100},
-        {"id": 2, "name": "Pizza", "price": 150},
-        {"id": 3, "name": "Fries", "price": 70},
-        {"id": 4, "name": "egg noodles", "price": 100},
-        {"id": 5, "name": "Water Bottle", "price": 20}
+        {"id": 1, "name": "Burger", "price": 99},
+        {"id": 2, "name": "Pizza", "price": 149},
+        {"id": 3, "name": "Fries", "price": 49},
+        {"id": 4, "name": "Egg Noodles", "price": 60},
+        {"id": 5, "name": "Lays", "price": 20},
+        {"id": 6, "name": "Water Bottle", "price": 20},
+        {"id": 7, "name": "Ice Cream", "price": 50},
+        {"id": 8, "name": "Biscuits", "price": 20},
+        {"id": 9, "name": "Dairy Milk", "price": 20},
+        {"id": 10, "name": "Thumbs Up", "price": 20}
     ]
     return jsonify(food_menu)
 
 def update_status(order):
     print("Started status thread for order", order["order_id"])
 
-    time.sleep(5)
+    
     order["status"] = "Almost Ready!!!"
     print("Order", order["order_id"], "-> Ready")
 
-    time.sleep(5)
+    
     order["status"] = "Your Order is Ready"
     print("Order", order["order_id"], "-> Delivered")
 
@@ -65,7 +70,7 @@ def place_order():
         "payment_status": data.get("payment_status", "Pending"),
         "payment_method": data.get("payment_method", "N/A"),
         "status": "Preparing",
-        "seats_left": available_seats 
+        "seats_left": available_seats -1
     }
 
     orders.append(order)
