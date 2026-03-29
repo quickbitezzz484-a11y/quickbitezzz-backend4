@@ -3,49 +3,44 @@ from flask_cors import CORS
 import threading
 import time
 
-
 app = Flask(__name__)
 CORS(app)
-
 
 current_serving_token = 100
 
 valid_students = [
-    {"name": "Jaideep", "roll_no": "25K91A66P9"},
-    {"name": "Rahul", "roll_no": "25K91A66P8"},
-    {"name": "Ananya", "roll_no": "25K91A66P7"}
+    {"name": "Jaideep", "roll_no": "25K91A66P9", "password": "JaideepP9"},
+    {"name": "Rahul", "roll_no": "25K91A66P8", "password": "RahulP8"},
+    {"name": "Ananya", "roll_no": "25K91A66P7", "password": "AnanyaP7"}
 ]
 
-
-
-
-
 orders = []
-TOTAL_SEATS = 20
+TOTAL_SEATS = 50
 available_seats = TOTAL_SEATS
-
-
 
 @app.route('/')
 def home():
     return "QuickBitezzz Backend Running 🚀"
+
 
 @app.route('/menu', methods=['GET'])
 def menu():
     food_menu = [
         {"id": 1, "name": "Burger", "price": 100},
         {"id": 2, "name": "Pizza", "price": 150},
-        {"id": 3, "name": "Fries", "price": 70}
+        {"id": 3, "name": "Fries", "price": 70},
+        {"id": 4, "name": "egg noodles", "price": 100}
     ]
     return jsonify(food_menu)
 
 def update_status(order):
     print("Started status thread for order", order["order_id"])
-    
-    order["status"] = "Ready Avuthundhi Chill macha"
-    print("Order", order["order_id"], "-> Out for Delivery")
 
-    
+    time.sleep(5)
+    order["status"] = "Ready Avuthundhi Chill macha"
+    print("Order", order["order_id"], "-> Ready")
+
+    time.sleep(5)
     order["status"] = "Ochi Tini Poo"
     print("Order", order["order_id"], "-> Delivered")
 
@@ -64,11 +59,12 @@ def place_order():
     order = {
         "order_id": len(orders) + 1,
         "token_number": len(orders) + 101,
-        "items": data.get("item"),
-        "total_amount": data.get("total"),
+        "items": data.get("item", []),
+        "total_amount": data.get("total", 0),
         "payment_status": data.get("payment_status", "Pending"),
+        "payment_method": data.get("payment_method", "N/A"),
         "status": "Preparing",
-        "seats_left": available_seats - 1
+        "seats_left": available_seats 
     }
 
     orders.append(order)
@@ -81,6 +77,7 @@ def place_order():
         "order": order,
         "available_seats": available_seats
     })
+
 @app.route('/status/<int:order_id>', methods=['GET'])
 def check_status(order_id):
     for order in orders:
@@ -92,7 +89,6 @@ def check_status(order_id):
 def get_orders():
     return jsonify(orders)
 
-
 @app.route('/seats', methods=['GET'])
 def get_seats():
     return jsonify({
@@ -100,40 +96,40 @@ def get_seats():
         "available_seats": available_seats
     })
 
-
-valid_students = [
-    {"name": "Jaideep", "roll_no": "25K91A66P9"},
-    {"name": "Rahul", "roll_no": "25K91A66P8"},
-    {"name": "Ananya", "roll_no": "25K91A66P7"}
-]
-
 @app.route('/login', methods=['POST'])
 def login():
     data = request.json
 
     name = data.get("name", "").strip()
     roll_no = data.get("roll_no", "").strip()
+    password = data.get("password", "").strip()
 
-    if not name or not roll_no:
+    if not name or not roll_no or not password:
         return jsonify({
             "success": False,
-            "message": "Name and Roll Number are required."
+            "message": "Name, Roll Number and Password are required."
         }), 400
 
     for student in valid_students:
-        if student["name"].lower() == name.lower() and student["roll_no"] == roll_no:
-            return jsonify({
-                "success": True,
-                "message": "Login successful",
-                "user": student
-            })
+    
+     if (
+        student["name"].lower() == name.lower() and
+        student["roll_no"] == roll_no and
+        student["password"] == password
+    ):
+        return jsonify({
+            "success": True,
+            "message": "Login successful",
+            "user": {
+                "name": student["name"],
+                "roll_no": student["roll_no"]
+            }
+        })
 
     return jsonify({
         "success": False,
-        "message": "Invalid college details."
+        "message": "Invalid login details."
     }), 401
-
-
 
 @app.route('/admin/update-status/<int:order_id>', methods=['PUT'])
 def admin_update_status(order_id):
@@ -160,7 +156,6 @@ def get_current_token():
         "current_token": current_serving_token
     })
 
-
 @app.route('/admin/update-token/<int:token>', methods=['PUT'])
 def update_token(token):
     global current_serving_token
@@ -171,6 +166,46 @@ def update_token(token):
         "message": "Current token updated",
         "current_token": current_serving_token
     })
+
+@app.route('/admin/update-seats/<int:seats>', methods=['PUT'])
+def update_seats(seats):
+    global available_seats
+    available_seats = seats
+
+    return jsonify({
+        "success": True,
+        "message": "Available seats updated",
+        "available_seats": available_seats,
+        "total_seats": TOTAL_SEATS
+    })
+
+@app.route('/admin/increase-seats', methods=['PUT'])
+def increase_seats():
+    global available_seats, TOTAL_SEATS
+
+    if available_seats < TOTAL_SEATS:
+        available_seats += 1
+
+    return jsonify({
+        "success": True,
+        "available_seats": available_seats,
+        "total_seats": TOTAL_SEATS
+    })
+
+@app.route('/admin/decrease-seats', methods=['PUT'])
+def decrease_seats():
+    global available_seats
+
+    if available_seats > 0:
+        available_seats -= 1
+
+    return jsonify({
+        "success": True,
+        "available_seats": available_seats,
+        "total_seats": TOTAL_SEATS
+    })
+
+
 
 if __name__ == '__main__':
     app.run(debug=False)
